@@ -6,3 +6,19 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# IDE and Editor
+.idea/
+
+# Python Cache
+__pycache__/
+*.pyc
+backend/__pycache__/
+backend/__pycache__/__init__.cpython-314.pyc
+backend/__pycache__/database.cpython-314.pyc
+
+# Dependencies lock
+package-lock.json
+
+# Database
+backend/expenses.db
