@@ -1,0 +1,6 @@
+{
+  "name": "Autonomous Agent System: Expense Tracker",
+  "description": "Multi-agent autonomous software development system featuring Phase 1 Developer Agent workflow and Personal Expense Tracker application.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
