@@ -17,7 +17,7 @@ def init_db():
     CREATE TABLE IF NOT EXISTS expenses (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         amount REAL NOT NULL,
-        currency TEXT DEFAULT 'USD',
+        currency TEXT DEFAULT 'EUR',
         category TEXT NOT NULL,
         date TEXT NOT NULL,
         description TEXT NOT NULL,
@@ -31,7 +31,7 @@ def init_db():
     cursor.execute("PRAGMA table_info(expenses)")
     columns = [col[1] for col in cursor.fetchall()]
     if "currency" not in columns:
-        cursor.execute("ALTER TABLE expenses ADD COLUMN currency TEXT DEFAULT 'USD'")
+        cursor.execute("ALTER TABLE expenses ADD COLUMN currency TEXT DEFAULT 'EUR'")
         conn.commit()
 
     # Check if table is empty, if so, seed sample realistic data for validation
@@ -39,18 +39,18 @@ def init_db():
     count = cursor.fetchone()[0]
     if count == 0:
         sample_expenses = [
-            (42.50, "USD", "Food & Dining", "2026-09-01", "Grocery shopping at Market", "Weekly essentials and produce"),
-            (14.99, "USD", "Entertainment", "2026-09-02", "Streaming Service Subscription", "Monthly recurring"),
-            (120.00, "USD", "Utilities", "2026-09-03", "Electric and Power Bill", "August billing cycle"),
-            (35.20, "USD", "Transportation", "2026-09-04", "Metro Transit Pass & Fuel", "Commute fare"),
-            (85.00, "USD", "Food & Dining", "2026-09-05", "Team Dinner with Colleagues", "Italian bistro"),
-            (65.00, "USD", "Healthcare", "2026-09-06", "Prescription & Pharmacy", "Vitamins and allergy medication"),
-            (49.99, "USD", "Shopping", "2026-09-06", "Ergonomic Desk Accessories", "Keyboard wrist rest"),
-            (8.75, "USD", "Food & Dining", "2026-09-07", "Morning Espresso and Pastry", "Corner Cafe"),
-            (150.00, "USD", "Utilities", "2026-08-15", "High-speed Fiber Internet", "Home office broadband"),
-            (95.40, "USD", "Food & Dining", "2026-08-20", "Family Grocery Haul", "Supermarket bulk items"),
-            (210.00, "USD", "Shopping", "2026-08-24", "Fall Apparel & Shoes", "Seasonal essentials"),
-            (45.00, "USD", "Transportation", "2026-08-28", "Fuel & Vehicle Maintenance", "Tire pressure and wash")
+            (42.50, "EUR", "Food & Dining", "2026-09-01", "Grocery shopping at Market", "Weekly essentials and produce"),
+            (14.99, "EUR", "Entertainment", "2026-09-02", "Streaming Service Subscription", "Monthly recurring"),
+            (120.00, "EUR", "Utilities", "2026-09-03", "Electric and Power Bill", "August billing cycle"),
+            (35.20, "EUR", "Transportation", "2026-09-04", "Metro Transit Pass & Fuel", "Commute fare"),
+            (85.00, "EUR", "Food & Dining", "2026-09-05", "Team Dinner with Colleagues", "Italian bistro"),
+            (65.00, "EUR", "Healthcare", "2026-09-06", "Prescription & Pharmacy", "Vitamins and allergy medication"),
+            (49.99, "EUR", "Shopping", "2026-09-06", "Ergonomic Desk Accessories", "Keyboard wrist rest"),
+            (8.75, "EUR", "Food & Dining", "2026-09-07", "Morning Espresso and Pastry", "Corner Cafe"),
+            (150.00, "EUR", "Utilities", "2026-08-15", "High-speed Fiber Internet", "Home office broadband"),
+            (95.40, "EUR", "Food & Dining", "2026-08-20", "Family Grocery Haul", "Supermarket bulk items"),
+            (210.00, "EUR", "Shopping", "2026-08-24", "Fall Apparel & Shoes", "Seasonal essentials"),
+            (45.00, "EUR", "Transportation", "2026-08-28", "Fuel & Vehicle Maintenance", "Tire pressure and wash")
         ]
         now = datetime.utcnow().isoformat()
         cursor.executemany("""

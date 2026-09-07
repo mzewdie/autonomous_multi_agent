@@ -82,11 +82,11 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(ALLOWED_CATEGORIES).encode("utf-8"))
             return
 
-        # Supported Currencies (Primary: USD, EUR; Extensible: GBP, CHF, CAD, JPY)
+        # Supported Currencies (Primary: EUR, USD; Extensible: GBP, CHF, CAD, JPY)
         if path == "/api/currencies":
             currencies = [
-                {"code": "USD", "symbol": "$", "name": "US Dollar", "position": "prefix", "decimals": 2},
                 {"code": "EUR", "symbol": "€", "name": "Euro", "position": "suffix", "decimals": 2},
+                {"code": "USD", "symbol": "$", "name": "US Dollar", "position": "prefix", "decimals": 2},
                 {"code": "GBP", "symbol": "£", "name": "British Pound", "position": "prefix", "decimals": 2},
                 {"code": "CHF", "symbol": "CHF", "name": "Swiss Franc", "position": "prefix", "decimals": 2},
                 {"code": "CAD", "symbol": "CA$", "name": "Canadian Dollar", "position": "prefix", "decimals": 2},
@@ -290,7 +290,7 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
         if path == "/api/expenses":
             data = self._read_json_body()
             amount = float(data.get("amount", 0))
-            currency = str(data.get("currency", "USD")).upper().strip() or "USD"
+            currency = str(data.get("currency", "EUR")).upper().strip() or "EUR"
             category = str(data.get("category", "Other"))
             date_str = str(data.get("date", datetime.utcnow().strftime("%Y-%m-%d")))
             description = str(data.get("description", "")).strip()

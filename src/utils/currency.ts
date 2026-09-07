@@ -14,19 +14,19 @@ export interface Currency {
  */
 export const SUPPORTED_CURRENCIES: Currency[] = [
   {
-    code: 'USD',
-    symbol: '$',
-    name: 'US Dollar',
-    position: 'prefix',
-    locale: 'en-US',
-    decimals: 2,
-  },
-  {
     code: 'EUR',
     symbol: '€',
     name: 'Euro',
     position: 'suffix',
     locale: 'de-DE',
+    decimals: 2,
+  },
+  {
+    code: 'USD',
+    symbol: '$',
+    name: 'US Dollar',
+    position: 'prefix',
+    locale: 'en-US',
     decimals: 2,
   },
   {
@@ -63,9 +63,9 @@ export const SUPPORTED_CURRENCIES: Currency[] = [
   },
 ];
 
-export const DEFAULT_CURRENCY: Currency = SUPPORTED_CURRENCIES[0]; // USD ($)
+export const DEFAULT_CURRENCY: Currency = SUPPORTED_CURRENCIES[0]; // EUR (€)
 
-const CURRENCY_STORAGE_KEY = 'expense_tracker_currency';
+const CURRENCY_STORAGE_KEY = 'expense_tracker_currency_pref';
 
 /**
  * Formats any monetary amount according to the chosen currency's locale, symbol, and placement.
