@@ -1,6 +1,9 @@
+export type { Currency } from './utils/currency';
+
 export interface Expense {
   id: number;
   amount: number;
+  currency?: string;
   category: string;
   date: string;
   description: string;
@@ -11,6 +14,7 @@ export interface Expense {
 
 export interface ExpenseFormData {
   amount: string | number;
+  currency?: string;
   category: string;
   date: string;
   description: string;

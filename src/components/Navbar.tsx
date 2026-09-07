@@ -1,15 +1,21 @@
 import React from 'react';
 import { Wallet, Plus, Cpu, Layers } from 'lucide-react';
+import { CurrencySelector } from './CurrencySelector';
+import { Currency } from '../utils/currency';
 
 interface NavbarProps {
   onOpenAddModal: () => void;
   onOpenAgentDrawer: () => void;
+  currentCurrency: Currency;
+  onCurrencyChange: (currency: Currency) => void;
   agentStatusText?: string;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenAddModal,
   onOpenAgentDrawer,
+  currentCurrency,
+  onCurrencyChange,
   agentStatusText = 'Phase 1: Developer Agent'
 }) => {
   return (
@@ -38,6 +44,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Action Controls */}
           <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Extensible Currency Selector */}
+            <CurrencySelector
+              currentCurrency={currentCurrency}
+              onCurrencyChange={onCurrencyChange}
+            />
+
             {/* Agent System Protocol Badge & Trigger */}
             <button
               id="btn-agent-system"

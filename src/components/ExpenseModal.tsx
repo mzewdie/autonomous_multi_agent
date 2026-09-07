@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { X, DollarSign, Calendar, Tag, FileText, AlertCircle } from 'lucide-react';
+import { X, Calendar, Tag, FileText, AlertCircle } from 'lucide-react';
 import { Expense, ExpenseFormData } from '../types';
+import { Currency, SUPPORTED_CURRENCIES } from '../utils/currency';
 
 interface ExpenseModalProps {
   isOpen: boolean;
   expenseToEdit: Expense | null;
   categories: string[];
+  currency: Currency;
   onClose: () => void;
   onSubmit: (data: ExpenseFormData, id?: number) => Promise<void>;
 }
@@ -14,10 +16,12 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
   isOpen,
   expenseToEdit,
   categories,
+  currency,
   onClose,
   onSubmit,
 }) => {
   const [amount, setAmount] = useState('');
+  const [expenseCurrency, setExpenseCurrency] = useState<Currency>(currency);
   const [category, setCategory] = useState('Food & Dining');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [description, setDescription] = useState('');
@@ -28,19 +32,24 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
   useEffect(() => {
     if (expenseToEdit) {
       setAmount(expenseToEdit.amount.toString());
+      const matchedCurr = SUPPORTED_CURRENCIES.find(
+        (c) => c.code === expenseToEdit.currency || c.symbol === expenseToEdit.currency
+      );
+      setExpenseCurrency(matchedCurr || currency);
       setCategory(expenseToEdit.category);
       setDate(expenseToEdit.date);
       setDescription(expenseToEdit.description);
       setNotes(expenseToEdit.notes || '');
     } else {
       setAmount('');
+      setExpenseCurrency(currency);
       setCategory(categories[0] || 'Food & Dining');
       setDate(new Date().toISOString().split('T')[0]);
       setDescription('');
       setNotes('');
     }
     setError(null);
-  }, [expenseToEdit, isOpen, categories]);
+  }, [expenseToEdit, isOpen, categories, currency]);
 
   if (!isOpen) return null;
 
@@ -69,6 +78,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
       await onSubmit(
         {
           amount: parsedAmount,
+          currency: expenseCurrency.code,
           category,
           date,
           description: description.trim(),
@@ -119,11 +129,31 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
           {/* Amount & Date row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Amount ($) <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Amount ({expenseCurrency.symbol}) <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  id="select-expense-currency"
+                  value={expenseCurrency.code}
+                  onChange={(e) => {
+                    const found = SUPPORTED_CURRENCIES.find((c) => c.code === e.target.value);
+                    if (found) setExpenseCurrency(found);
+                  }}
+                  className="text-[11px] font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  title="Select currency for this expense"
+                >
+                  {SUPPORTED_CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.symbol} {c.code}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="relative">
-                <DollarSign className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" />
+                <span className="w-5 h-5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-700 font-bold text-xs flex items-center justify-center pointer-events-none">
+                  {expenseCurrency.symbol}
+                </span>
                 <input
                   id="input-expense-amount"
                   type="number"

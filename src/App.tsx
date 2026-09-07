@@ -5,9 +5,11 @@ import { ExpenseList } from './components/ExpenseList';
 import { ExpenseModal } from './components/ExpenseModal';
 import { AgentStatusDrawer } from './components/AgentStatusDrawer';
 import { Expense, ExpenseFilters, ExpenseFormData, ExpenseSummary } from './types';
+import { Currency, getSavedCurrency, saveCurrency } from './utils/currency';
 import { CheckCircle, AlertCircle, Info, ArrowUpRight } from 'lucide-react';
 
 export default function App() {
+  const [currency, setCurrency] = useState<Currency>(() => getSavedCurrency());
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [summary, setSummary] = useState<ExpenseSummary | null>(null);
   const [categories, setCategories] = useState<string[]>([
@@ -166,12 +168,20 @@ export default function App() {
     setIsAddModalOpen(true);
   };
 
+  const handleCurrencyChange = (newCurrency: Currency) => {
+    setCurrency(newCurrency);
+    saveCurrency(newCurrency.code);
+    showToast('success', `Display currency updated to ${newCurrency.name} (${newCurrency.symbol})`);
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans">
       {/* Primary Header */}
       <Navbar
         onOpenAddModal={handleOpenAddModal}
         onOpenAgentDrawer={() => setIsAgentDrawerOpen(true)}
+        currentCurrency={currency}
+        onCurrencyChange={handleCurrencyChange}
       />
 
       {/* Main Content Area */}
@@ -220,7 +230,7 @@ export default function App() {
               <p className="text-xs text-slate-700 mt-1 leading-relaxed max-w-3xl">
                 This application serves as the verification target for the autonomous multi-agent development system.
                 The Developer Agent has completed full React frontend views, FastAPI backend routes, and SQLite schema persistence.
-                Interfaces are prepared for Phase 2 (Orchestrator Agent) and Phase 3 (Tester Agent).
+                Now extended with multi-currency support ($ USD, € EUR, and modular future currencies).
               </p>
             </div>
           </div>
@@ -235,7 +245,7 @@ export default function App() {
         </div>
 
         {/* Dashboard Component (Summary cards, monthly totals, category distribution) */}
-        <Dashboard summary={summary} loading={loading && !summary} />
+        <Dashboard summary={summary} loading={loading && !summary} currency={currency} />
 
         {/* Expense List Component (Search, filters, table/cards, actions) */}
         <ExpenseList
@@ -243,6 +253,7 @@ export default function App() {
           loading={loading}
           filters={filters}
           categories={categories}
+          currency={currency}
           onFilterChange={setFilters}
           onEdit={handleEditClick}
           onDelete={handleDeleteExpense}
@@ -254,6 +265,7 @@ export default function App() {
         isOpen={isAddModalOpen}
         expenseToEdit={expenseToEdit}
         categories={categories}
+        currency={currency}
         onClose={() => {
           setIsAddModalOpen(false);
           setExpenseToEdit(null);

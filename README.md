@@ -128,6 +128,7 @@ The database uses SQLite 3 with WAL (Write-Ahead Logging) and foreign key enforc
 CREATE TABLE IF NOT EXISTS expenses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     amount REAL NOT NULL CHECK (amount > 0),
+    currency TEXT DEFAULT 'USD',  -- Supported: USD ($), EUR (€), extensible to GBP, CHF, CAD, JPY
     category TEXT NOT NULL,
     date TEXT NOT NULL,          -- Format: YYYY-MM-DD
     description TEXT NOT NULL,
@@ -143,6 +144,13 @@ CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses(category);
 #### Taxonomy Categories
 `Food & Dining`, `Transportation`, `Housing`, `Utilities`, `Entertainment`, `Healthcare`, `Shopping`, `Education`, `Personal`, `Other`.
 
+#### Supported Currencies & Extensibility
+Primary currencies are **$ (USD)** and **€ (EUR)**. The currency module in `src/utils/currency.ts` and `/api/currencies` is designed to be easily extensible:
+- `SUPPORTED_CURRENCIES` registry with symbol, ISO code, display position (prefix/suffix), and decimal precision.
+- Persistent user preference saved in `localStorage`.
+- Per-expense currency tracking in SQLite schema with backwards-compatible migration.
+- Extensible presets already provisioned for `GBP (£)`, `CHF (CHF)`, `CAD (CA$)`, and `JPY (¥)`.
+
 ### REST API Reference
 
 All endpoints are served from the backend (port `8000`) and proxied by Vite on `/api/*`.
@@ -150,12 +158,13 @@ All endpoints are served from the backend (port `8000`) and proxied by Vite on `
 | Method | Endpoint | Description | Sample Query / Body |
 |---|---|---|---|
 | `GET` | `/api/health` | Service health & active agent phase | None |
+| `GET` | `/api/currencies` | Returns supported currencies registry | None |
 | `GET` | `/api/expenses/categories` | Returns allowed category list | None |
 | `GET` | `/api/expenses/summary` | Aggregated totals, monthly bars, category percentages | None |
 | `GET` | `/api/expenses` | Query-filtered list of expenses | `?category=Food%20%26%20Dining&search=lunch&sort_by=amount&sort_order=desc` |
-| `POST` | `/api/expenses` | Create new expense | `{"amount": 42.50, "category": "Food & Dining", "date": "2026-09-07", "description": "Team Lunch", "notes": "Work expense"}` |
+| `POST` | `/api/expenses` | Create new expense | `{"amount": 42.50, "currency": "USD", "category": "Food & Dining", "date": "2026-09-07", "description": "Team Lunch"}` |
 | `GET` | `/api/expenses/{id}` | Retrieve single expense by ID | None |
-| `PUT` | `/api/expenses/{id}` | Update existing expense | `{"amount": 45.00, "description": "Team Lunch (updated)"}` |
+| `PUT` | `/api/expenses/{id}` | Update existing expense | `{"amount": 45.00, "currency": "EUR", "description": "Team Lunch (updated)"}` |
 | `DELETE`| `/api/expenses/{id}` | Delete expense record | None |
 | `GET` | `/api/agent/status` | Current multi-agent system status | None |
 | `GET` | `/api/agent/artifacts`| Audit history of developer artifacts | None |

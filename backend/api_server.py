@@ -82,6 +82,20 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(ALLOWED_CATEGORIES).encode("utf-8"))
             return
 
+        # Supported Currencies (Primary: USD, EUR; Extensible: GBP, CHF, CAD, JPY)
+        if path == "/api/currencies":
+            currencies = [
+                {"code": "USD", "symbol": "$", "name": "US Dollar", "position": "prefix", "decimals": 2},
+                {"code": "EUR", "symbol": "€", "name": "Euro", "position": "suffix", "decimals": 2},
+                {"code": "GBP", "symbol": "£", "name": "British Pound", "position": "prefix", "decimals": 2},
+                {"code": "CHF", "symbol": "CHF", "name": "Swiss Franc", "position": "prefix", "decimals": 2},
+                {"code": "CAD", "symbol": "CA$", "name": "Canadian Dollar", "position": "prefix", "decimals": 2},
+                {"code": "JPY", "symbol": "¥", "name": "Japanese Yen", "position": "prefix", "decimals": 0},
+            ]
+            self._set_headers(200)
+            self.wfile.write(json.dumps(currencies).encode("utf-8"))
+            return
+
         # Summary Breakdown
         if path == "/api/expenses/summary":
             conn = get_db_connection()
@@ -148,7 +162,7 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
 
             conn = get_db_connection()
             cursor = conn.cursor()
-            sql = "SELECT id, amount, category, date, description, notes, created_at, updated_at FROM expenses WHERE 1=1"
+            sql = "SELECT id, amount, currency, category, date, description, notes, created_at, updated_at FROM expenses WHERE 1=1"
             params = []
 
             if category and category.lower() != "all":
@@ -177,6 +191,7 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
                 {
                     "id": r["id"],
                     "amount": r["amount"],
+                    "currency": r["currency"] if "currency" in r.keys() else "USD",
                     "category": r["category"],
                     "date": r["date"],
                     "description": r["description"],
@@ -197,7 +212,7 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
                 expense_id = int(parts[3])
                 conn = get_db_connection()
                 cursor = conn.cursor()
-                cursor.execute("SELECT id, amount, category, date, description, notes, created_at, updated_at FROM expenses WHERE id = ?", (expense_id,))
+                cursor.execute("SELECT id, amount, currency, category, date, description, notes, created_at, updated_at FROM expenses WHERE id = ?", (expense_id,))
                 r = cursor.fetchone()
                 conn.close()
                 if not r:
@@ -208,6 +223,7 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({
                     "id": r["id"],
                     "amount": r["amount"],
+                    "currency": r["currency"] if "currency" in r.keys() else "USD",
                     "category": r["category"],
                     "date": r["date"],
                     "description": r["description"],
@@ -274,6 +290,7 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
         if path == "/api/expenses":
             data = self._read_json_body()
             amount = float(data.get("amount", 0))
+            currency = str(data.get("currency", "USD")).upper().strip() or "USD"
             category = str(data.get("category", "Other"))
             date_str = str(data.get("date", datetime.utcnow().strftime("%Y-%m-%d")))
             description = str(data.get("description", "")).strip()
@@ -288,13 +305,13 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO expenses (amount, category, date, description, notes, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (amount, category, date_str, description, notes, now, now))
+                INSERT INTO expenses (amount, currency, category, date, description, notes, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (amount, currency, category, date_str, description, notes, now, now))
             expense_id = cursor.lastrowid
             conn.commit()
 
-            cursor.execute("SELECT id, amount, category, date, description, notes, created_at, updated_at FROM expenses WHERE id = ?", (expense_id,))
+            cursor.execute("SELECT id, amount, currency, category, date, description, notes, created_at, updated_at FROM expenses WHERE id = ?", (expense_id,))
             r = cursor.fetchone()
             conn.close()
 
@@ -302,6 +319,7 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({
                 "id": r["id"],
                 "amount": r["amount"],
+                "currency": r["currency"] if "currency" in r.keys() else "USD",
                 "category": r["category"],
                 "date": r["date"],
                 "description": r["description"],
@@ -338,6 +356,9 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
                 if "amount" in data and data["amount"] is not None:
                     fields.append("amount = ?")
                     params.append(float(data["amount"]))
+                if "currency" in data and data["currency"] is not None:
+                    fields.append("currency = ?")
+                    params.append(str(data["currency"]).upper().strip())
                 if "category" in data and data["category"] is not None:
                     fields.append("category = ?")
                     params.append(str(data["category"]))
@@ -359,7 +380,7 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
                 cursor.execute(f"UPDATE expenses SET {', '.join(fields)} WHERE id = ?", params)
                 conn.commit()
 
-                cursor.execute("SELECT id, amount, category, date, description, notes, created_at, updated_at FROM expenses WHERE id = ?", (expense_id,))
+                cursor.execute("SELECT id, amount, currency, category, date, description, notes, created_at, updated_at FROM expenses WHERE id = ?", (expense_id,))
                 r = cursor.fetchone()
                 conn.close()
 
@@ -367,6 +388,7 @@ class ExpenseAPIHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({
                     "id": r["id"],
                     "amount": r["amount"],
+                    "currency": r["currency"] if "currency" in r.keys() else "USD",
                     "category": r["category"],
                     "date": r["date"],
                     "description": r["description"],

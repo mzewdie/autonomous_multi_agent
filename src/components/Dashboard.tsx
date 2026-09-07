@@ -1,10 +1,12 @@
 import React from 'react';
-import { TrendingUp, Calendar, DollarSign, PieChart } from 'lucide-react';
+import { TrendingUp, Calendar, PieChart } from 'lucide-react';
 import { ExpenseSummary } from '../types';
+import { Currency, formatCurrency } from '../utils/currency';
 
 interface DashboardProps {
   summary: ExpenseSummary | null;
   loading: boolean;
+  currency: Currency;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -20,7 +22,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Other': 'bg-slate-400',
 };
 
-export const Dashboard: React.FC<DashboardProps> = ({ summary, loading }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ summary, loading, currency }) => {
   if (loading || !summary) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -35,7 +37,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ summary, loading }) => {
   }
 
   const averageExpense =
-    summary.total_count > 0 ? (summary.total_amount / summary.total_count).toFixed(2) : '0.00';
+    summary.total_count > 0 ? summary.total_amount / summary.total_count : 0;
 
   // Find max monthly total to scale monthly bars
   const maxMonthTotal = Math.max(
@@ -53,13 +55,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ summary, loading }) => {
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-700">
               Total Recorded
             </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <DollarSign className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center text-sm">
+              {currency.symbol}
             </div>
           </div>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-2xl font-bold text-slate-900">
-              ${summary.total_amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatCurrency(summary.total_amount, currency)}
             </span>
             <span className="text-xs text-slate-700">
               {summary.total_count} transactions
@@ -79,7 +81,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ summary, loading }) => {
           </div>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-2xl font-bold text-slate-900">
-              ${summary.current_month_total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatCurrency(summary.current_month_total, currency)}
             </span>
             <span className="text-xs text-blue-700 font-medium">
               Current Cycle
@@ -99,7 +101,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ summary, loading }) => {
           </div>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-2xl font-bold text-slate-900">
-              ${averageExpense}
+              {formatCurrency(averageExpense, currency)}
             </span>
             <span className="text-xs text-slate-700">
               Per entry
@@ -122,7 +124,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ summary, loading }) => {
               {summary.category_breakdown[0]?.category || 'None'}
             </span>
             <span className="text-xs text-slate-700">
-              {summary.category_breakdown[0] ? `$${summary.category_breakdown[0].total.toFixed(2)} (${summary.category_breakdown[0].percentage}%)` : 'No data'}
+              {summary.category_breakdown[0]
+                ? `${formatCurrency(summary.category_breakdown[0].total, currency)} (${summary.category_breakdown[0].percentage}%)`
+                : 'No data'}
             </span>
           </div>
         </div>
@@ -157,7 +161,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ summary, loading }) => {
                       <div className="space-x-2">
                         <span className="text-slate-700">{item.count} items</span>
                         <span className="font-bold text-slate-900">
-                          ${item.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                          {formatCurrency(item.total, currency)}
                         </span>
                       </div>
                     </div>
@@ -201,7 +205,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ summary, loading }) => {
                       <div className="flex items-center space-x-2">
                         <span className="text-slate-700">{item.percentage}%</span>
                         <span className="font-bold text-slate-900">
-                          ${item.total.toFixed(2)}
+                          {formatCurrency(item.total, currency)}
                         </span>
                       </div>
                     </div>

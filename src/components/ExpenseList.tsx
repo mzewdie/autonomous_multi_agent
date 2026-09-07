@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Search, Filter, Trash2, Edit3, ArrowUpDown, Calendar, X } from 'lucide-react';
 import { Expense, ExpenseFilters } from '../types';
+import { Currency, formatCurrency } from '../utils/currency';
 
 interface ExpenseListProps {
   expenses: Expense[];
   loading: boolean;
   filters: ExpenseFilters;
   categories: string[];
+  currency: Currency;
   onFilterChange: (filters: ExpenseFilters) => void;
   onEdit: (expense: Expense) => void;
   onDelete: (id: number) => void;
@@ -30,6 +32,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
   loading,
   filters,
   categories,
+  currency,
   onFilterChange,
   onEdit,
   onDelete,
@@ -255,7 +258,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                 {/* Right actions and amount */}
                 <div className="flex items-center justify-between sm:justify-end space-x-4">
                   <span className="text-base font-bold text-slate-900">
-                    ${expense.amount.toFixed(2)}
+                    {formatCurrency(expense.amount, expense.currency || currency)}
                   </span>
                   <div className="flex items-center space-x-1">
                     <button
